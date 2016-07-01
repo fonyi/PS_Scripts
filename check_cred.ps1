@@ -1,3 +1,8 @@
+#Simple script that prompts for credentials and determines if the credentials are good or not
+
+#TODO
+#Create loop
+#allow for file imput and display status in terminal
 $cred = Get-Credential #Read credentials
  $username = $cred.username
  $password = $cred.GetNetworkCredential().password
