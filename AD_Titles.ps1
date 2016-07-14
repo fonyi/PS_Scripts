@@ -2,11 +2,12 @@
 $inputfile = Get-FileName "C:\temp"
 $Users = Get-Content $inputfile
 $result=@()
+$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMdd
 Foreach($User in $Users)
 {
 $result += get-aduser -ldapfilter "(mail=$User)" -property displayname,mail,title,department | Select-Object -Property displayname,mail,title, department
 }$result|
-Export-Csv -NoTypeInformation 'C:\Users\$USER\Desktop\title.csv'
+Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
 Function Get-FileName($initialDirectory)
 {
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
