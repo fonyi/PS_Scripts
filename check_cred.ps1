@@ -1,8 +1,8 @@
 #Simple script that prompts for credentials and determines if the credentials are good or not
 
 #TODO
-#Create loop
 #allow for file imput and display status in terminal
+do{
 $cred = Get-Credential #Read credentials
  $username = $cred.username
  $password = $cred.GetNetworkCredential().password
@@ -14,10 +14,12 @@ $cred = Get-Credential #Read credentials
 if ($domain.name -eq $null)
 {
  write-host "Authentication failed - please verify your username and password."
-  Read-Host -Prompt "Press Enter to exit"
+  $continue = Read-Host -Prompt 'Enter "1" to check again or nothing to exit'
 }
 else
 {
- write-host "Successfully authenticated with domain $domain.name"
-  Read-Host -Prompt "Press Enter to exit"
+ write-host "Successfully authenticated with user $username"
+  $continue = Read-Host -Prompt 'Enter "1" to check again or nothing to exit'
 }
+}
+while($continue -eq "1")
