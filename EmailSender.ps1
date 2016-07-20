@@ -6,7 +6,7 @@ $smtpServer = Read-Host -Prompt 'Enter the email server'
 $smtpFrom = Read-Host -Prompt 'Enter the sender address'
 $messageSubject = Read-Host -Prompt 'Enter an email subject'
 $username = Read-Host -Prompt 'Enter username for email server authentication'
-$password = Read-Host -Prompt 'Enter password for email server authentication'
+$password = Read-Host -Prompt 'Enter password for email server authentication' -AsSecureString
 Foreach($User in $Users)
 {
  $onlineID =  get-aduser -ldapfilter "(mail=$User)" -property samaccountname | Select -ExpandProperty samaccountname
