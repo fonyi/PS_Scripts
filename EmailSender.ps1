@@ -15,7 +15,7 @@ Foreach($User in $Users)
  $message = New-Object System.Net.Mail.MailMessage $smtpFrom, $User
  $message.Subject = $messageSubject
  $message.IsBodyHTML = $true
- $message.Body = "I am a message with a malicious link. Please login to http://phishingpage.ku.edu/$EncodedText"
+ $message.Body = "I am a message with a malicious link. Please login to http://fakewebsite.com/?$EncodedText"
  $smtp = New-Object Net.Mail.SmtpClient($smtpServer)
  $smtp.EnableSsl = $true
  $smtp.Credentials = New-Object System.Net.NetworkCredential($username, $password);
