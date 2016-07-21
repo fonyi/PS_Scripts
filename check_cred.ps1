@@ -1,7 +1,36 @@
 #Simple script that prompts for credentials and determines if the credentials are good or not
 
-#TODO
-#allow for file imput and display status in terminal
+#allow for file input and display status in terminal
+Function Get-FileName($initialDirectory)
+{
+    [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
+    
+    $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+    $OpenFileDialog.initialDirectory = $initialDirectory
+    $OpenFileDialog.filter = "TXT (*.txt)| *.txt"
+    $OpenFileDialog.ShowDialog() | Out-Null
+    $OpenFileDialog.filename
+}
+#allow for file input and display status in terminal
+$option = Read-Host -Prompt 'Enter 1 to upload a file in the format username:password or press enter to manually enter creds.'
+if ($option -eq "1"){
+ $inputfile = Get-FileName "C:\temp"
+ $Users = Get-Content $inputfile
+ Foreach ($User in $Users){
+  $UserName,$Password = $User.split(':',2)
+  $CurrentDomain = "LDAP://" + ([ADSI]"").distinguishedName
+  $domain = New-Object System.DirectoryServices.DirectoryEntry($CurrentDomain,$UserName,$Password)
+  if ($domain.name -eq $null){
+    write-host "Authentication failed for $Username"
+   }
+  else{
+   write-host "Successfully authenticated with user $UserName"
+  }
+ }
+ Read-Host -Prompt 'Press Enter to exit'
+}
+#allow for manual entry of credentials
+else{
 do{
 $cred = Get-Credential #Read credentials
  $username = $cred.username
@@ -23,3 +52,4 @@ else
 }
 }
 while($continue -eq "1")
+}
