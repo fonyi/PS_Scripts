@@ -14,6 +14,7 @@ Function Get-FileName($initialDirectory)
     $OpenFileDialog.ShowDialog() | Out-Null
     $OpenFileDialog.filename
 }
+
 #allow for file input and display status in terminal
 $option = Read-Host -Prompt 'Enter 1 to upload a file in the format username:password or username@domain.com:password or press enter to manually enter creds.'
 if ($option -eq "1"){
@@ -21,6 +22,9 @@ if ($option -eq "1"){
  $Users = Get-Content $inputfile
  Foreach ($User in $Users){
   $UserName,$Password = $User.split(':',2)
+
+  #match regex for password with at least 1 cap, 1 lowercase, 1 number, and 1 special char between 8 and 32 chars. 
+  if ($Password -match '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,32}$'){
   if ($UserName -like '*@*'){
      $pos = $UserName.IndexOf("@")
      $UserName = $UserName.Substring(0,$pos)
@@ -31,8 +35,12 @@ if ($option -eq "1"){
     write-host "Authentication failed for $Username"
    }
   else{
-   write-host "Successfully authenticated with user $UserName"
-  }
+    write-host "Successfully authenticated with user $UserName"
+   }
+ }
+ else {
+  write-host "Password does not meet complexity for $Username"
+ }
  }
  Read-Host -Prompt 'Press Enter to exit'
 }
