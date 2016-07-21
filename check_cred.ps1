@@ -16,7 +16,7 @@ Function Get-FileName($initialDirectory)
 }
 
 #allow for file input and display status in terminal
-$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddss
+$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddHHmmss
 $option = Read-Host -Prompt 'Enter 1 to upload a file in the format username:password or username@domain.com:password or press enter to manually enter creds.'
 if ($option -eq "1"){
  $inputfile = Get-FileName "C:\temp"
