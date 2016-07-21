@@ -1,5 +1,15 @@
 #Script will take a list of emails separated by a return and send the person a predefined email with a hashed vaule of their SAMAccount name appended to the end of a URL that is listed in the message.
 #Created by Shane Fonyi 7/20/2016
+Function Get-FileName($initialDirectory)
+{
+    [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
+    
+    $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+    $OpenFileDialog.initialDirectory = $initialDirectory
+    $OpenFileDialog.filter = "TXT (*.txt)| *.txt"
+    $OpenFileDialog.ShowDialog() | Out-Null
+    $OpenFileDialog.filename
+}
 $inputfile = Get-FileName "C:\temp"
 $Users = Get-Content $inputfile
 $smtpServer = Read-Host -Prompt 'Enter the email server'
@@ -21,15 +31,5 @@ Foreach($User in $Users)
  $smtp.EnableSsl = $true
  $smtp.Credentials = New-Object System.Net.NetworkCredential($username, $password);
  $smtp.Send($message)
-}
-Function Get-FileName($initialDirectory)
-{
-    [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
-    
-    $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-    $OpenFileDialog.initialDirectory = $initialDirectory
-    $OpenFileDialog.filter = "TXT (*.txt)| *.txt"
-    $OpenFileDialog.ShowDialog() | Out-Null
-    $OpenFileDialog.filename
 }
 exit
