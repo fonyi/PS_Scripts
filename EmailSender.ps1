@@ -23,7 +23,7 @@ Foreach($User in $Users)
  $firstname = get-aduser -ldapfilter "(mail=$User)" -property GivenName | Select -ExpandProperty GivenName
  $bytes = [System.Text.Encoding]::Unicode.GetBytes($onlineID)
  $EncodedText = [Convert]::ToBase64String($bytes) 
- $link = '<a href="http://clickhere.itso.ku.edu/?$EncodedText">here</a>'
+ $link = '<a href="http://clickhere.college.edu/?$EncodedText">here</a>'
  $link = $ExecutionContext.InvokeCommand.ExpandString($link) 
  $message = New-Object System.Net.Mail.MailMessage $smtpFrom, $User
  $message.Subject = $messageSubject
