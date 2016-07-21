@@ -23,10 +23,12 @@ Foreach($User in $Users)
  $firstname = get-aduser -ldapfilter "(mail=$User)" -property GivenName | Select -ExpandProperty GivenName
  $bytes = [System.Text.Encoding]::Unicode.GetBytes($onlineID)
  $EncodedText = [Convert]::ToBase64String($bytes) 
+ $link = '<a href="http://clickhere.itso.ku.edu/?$EncodedText">here</a>'
+ $link = $ExecutionContext.InvokeCommand.ExpandString($link) 
  $message = New-Object System.Net.Mail.MailMessage $smtpFrom, $User
  $message.Subject = $messageSubject
  $message.IsBodyHTML = $true
- $message.Body = "Dear $firstname<BR><BR><B><H4>Your account has been compromised!</H4><P></B>Please go to http://clickhere.college.edu/?$EncodedText to reset your password.<BR><BR>Sincerely,<BR><BR>IT Customer Service<BR>University of City<BR>555-555-5555<BR>it@college.edu</A></P>"
+ $message.Body = "Dear $firstname<BR><BR><B><H4>Your account has been compromised!</H4><P></B>Please go $link to reset your password.<BR><BR>Sincerely,<BR><BR>IT Customer Service<BR>University of City<BR>555-555-5555<BR>it@college.edu</A></P>"
  $smtp = New-Object Net.Mail.SmtpClient($smtpServer)
  $smtp.EnableSsl = $true
  $smtp.Credentials = New-Object System.Net.NetworkCredential($username, $password);
