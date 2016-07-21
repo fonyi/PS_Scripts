@@ -1,6 +1,6 @@
-#Simple script that prompts for credentials and determines if the credentials are good or not against LDAP.
+#Script that prompts for credentials and determines if the credentials are good or not against LDAP.
+#Created by Shane Fonyi 7/21/2016
 #TODO
-##Check creds for complexity using regex for requirements
 ##Check for username based off of email alias
 
 #allow for file input and display status in terminal
