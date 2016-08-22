@@ -1,5 +1,4 @@
 #Script takes a display name in the format "Lastname, Firstname" WITHOUT quotes separated by a return and resturns a CSV with Online ID and primary email address.
-Import-Module activedirectory
 Function Get-FileName($initialDirectory)
 {
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
@@ -10,13 +9,14 @@ Function Get-FileName($initialDirectory)
     $OpenFileDialog.ShowDialog() | Out-Null
     $OpenFileDialog.filename
 }
-$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
 $inputfile = Get-FileName "C:\temp"
-Get-Content $inputfile |
-ForEach-Object{
-
-get-aduser -ldapfilter "(displayname=$_*)" -property samaccountname,displayname,mail | Select-Object -Property samaccountname,mail
-
-} |
-Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
+$Users = Get-Content $inputfile
+$result=@()
+$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
+Foreach($User in $Users)
+{
+$Lastname,$Firstname = $User.split(', ',2)
+$result += get-aduser -filter { sn -like $Lastname -and givenName -like $Firstname} -property samaccountname,displayname,mail | Select-Object -Property samaccountname,displayname,mail
+}$result|
+Export-Csv -NoTypeInformation "$PSScriptRoot\whois$todaysdate.csv"
 exit
