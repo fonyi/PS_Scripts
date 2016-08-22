@@ -10,11 +10,12 @@ Function Get-FileName($initialDirectory)
     $OpenFileDialog.ShowDialog() | Out-Null
     $OpenFileDialog.filename
 }
+$todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
 $inputfile = Get-FileName "C:\temp"
 Get-Content $inputfile |
 ForEach-Object{
 
-get-aduser -ldapfilter "(displayname=$_)" -property samaccountname,displayname,mail | Select-Object -Property samaccountname,mail
+get-aduser -ldapfilter "(displayname=$_*)" -property samaccountname,displayname,mail | Select-Object -Property samaccountname,mail
 
 } |
 Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
