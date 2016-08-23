@@ -223,14 +223,14 @@ Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
 
 3 {Foreach($Input in $Inputs)
 {
-$Lastname,$Firstname = $User.split(', ',2)
+$Lastname,$Firstname = $Input.split(', ',2)
 $result += get-aduser -filter { sn -like $Lastname -and givenName -like $Firstname} -Properties (foreach{$props}) | Select-Object -Property (foreach{$props})
 }$result|
 Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"}
 
 4 {Foreach($Input in $Inputs)
 {
-$Firstname,$Lastname = $User.split(' ',2)
+$Firstname,$Lastname = $Input.split(' ',2)
 $result += get-aduser -filter { sn -like $Lastname -and givenName -like $Firstname} -Properties (foreach{$props}) | Select-Object -Property (foreach{$props})
 }$result|
 Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"}
