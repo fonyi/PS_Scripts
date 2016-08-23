@@ -4,6 +4,7 @@
 #The ouput options determine the values pulled from LDAP and added to the CSV for each user 
 #Created by Shane Fonyi 8/23/2016
 Import-Module activedirectory
+Add-Type -AssemblyName System.Windows.Forms
 Function Get-FileName($initialDirectory)
 {
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
@@ -207,6 +208,7 @@ if (!$checkBox3.Checked){$props.Remove($box3)}
 if (!$checkBox4.Checked){$props.Remove($box4)}
 if (!$checkBox5.Checked){$props.Remove($box5)}
 $todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
+$result=@()
 switch ($list){
 1 {Foreach($User in $Users)
 {
