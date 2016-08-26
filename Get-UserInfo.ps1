@@ -15,6 +15,7 @@ Function Get-FileName($initialDirectory)
     $OpenFileDialog.ShowDialog() | Out-Null
     $OpenFileDialog.filename
 }
+$checkBox6 = New-Object System.Windows.Forms.CheckBox
 $checkBox5 = New-Object System.Windows.Forms.CheckBox
 $checkBox4 = New-Object System.Windows.Forms.CheckBox 
 $checkBox3 = New-Object System.Windows.Forms.CheckBox
@@ -42,7 +43,7 @@ $handler_button1_Click=
 {
     $listBox1.Items.Clear();    
 
-    if ( !$checkBox1.Checked -and !$checkBox2.Checked -and !$checkBox3.Checked -and !$checkBox4.Checked -and !$checkBox5.Checked) {   $listBox1.Items.Add("No CheckBox selected....")} 
+    if ( !$checkBox1.Checked -and !$checkBox2.Checked -and !$checkBox3.Checked -and !$checkBox4.Checked -and !$checkBox5.Checked -and !$checkBox6.Checked) {   $listBox1.Items.Add("No CheckBox selected....")} 
     else {$form1.Close()}
 }
 
@@ -91,9 +92,25 @@ $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 137
 $System_Drawing_Point.Y = 13
 $listBox1.Location = $System_Drawing_Point
-$listBox1.TabIndex = 5
+$listBox1.TabIndex = 6
 
 $form1.Controls.Add($listBox1)
+
+   $checkBox6.UseVisualStyleBackColor = $True
+    $System_Drawing_Size = New-Object System.Drawing.Size
+    $System_Drawing_Size.Width = 104
+    $System_Drawing_Size.Height = 24
+    $checkBox6.Size = $System_Drawing_Size
+    $checkBox6.TabIndex = 5
+    $checkBox6.Text = "Password Last Set"
+    $System_Drawing_Point = New-Object System.Drawing.Point
+    $System_Drawing_Point.X = 27
+    $System_Drawing_Point.Y = 168
+    $checkBox6.Location = $System_Drawing_Point
+    $checkBox6.DataBindings.DefaultDataSourceUpdateMode = 0
+    $checkBox6.Name = "checkBox6"
+
+$form1.Controls.Add($checkBox6)
 
    $checkBox5.UseVisualStyleBackColor = $True
     $System_Drawing_Size = New-Object System.Drawing.Size
@@ -128,36 +145,36 @@ $form1.Controls.Add($checkBox5)
 $form1.Controls.Add($checkBox4)
 
  
-$checkBox3.UseVisualStyleBackColor = $True
-$System_Drawing_Size = New-Object System.Drawing.Size
-$System_Drawing_Size.Width = 104
-$System_Drawing_Size.Height = 24
-$checkBox3.Size = $System_Drawing_Size
-$checkBox3.TabIndex = 2
-$checkBox3.Text = "DisplayName"
-$System_Drawing_Point = New-Object System.Drawing.Point
-$System_Drawing_Point.X = 27
-$System_Drawing_Point.Y = 75
-$checkBox3.Location = $System_Drawing_Point
-$checkBox3.DataBindings.DefaultDataSourceUpdateMode = 0
-$checkBox3.Name = "checkBox3"
+	$checkBox3.UseVisualStyleBackColor = $True
+	$System_Drawing_Size = New-Object System.Drawing.Size
+	$System_Drawing_Size.Width = 104
+	$System_Drawing_Size.Height = 24
+	$checkBox3.Size = $System_Drawing_Size
+	$checkBox3.TabIndex = 2
+	$checkBox3.Text = "DisplayName"
+	$System_Drawing_Point = New-Object System.Drawing.Point
+	$System_Drawing_Point.X = 27
+	$System_Drawing_Point.Y = 75
+	$checkBox3.Location = $System_Drawing_Point
+	$checkBox3.DataBindings.DefaultDataSourceUpdateMode = 0
+	$checkBox3.Name = "checkBox3"
 
 $form1.Controls.Add($checkBox3)
 
 
-$checkBox2.UseVisualStyleBackColor = $True
-$System_Drawing_Size = New-Object System.Drawing.Size
-$System_Drawing_Size.Width = 104
-$System_Drawing_Size.Height = 24
-$checkBox2.Size = $System_Drawing_Size
-$checkBox2.TabIndex = 1
-$checkBox2.Text = "Email Address"
-$System_Drawing_Point = New-Object System.Drawing.Point
-$System_Drawing_Point.X = 27
-$System_Drawing_Point.Y = 44
-$checkBox2.Location = $System_Drawing_Point
-$checkBox2.DataBindings.DefaultDataSourceUpdateMode = 0
-$checkBox2.Name = "checkBox2"
+	$checkBox2.UseVisualStyleBackColor = $True
+	$System_Drawing_Size = New-Object System.Drawing.Size
+	$System_Drawing_Size.Width = 104
+	$System_Drawing_Size.Height = 24
+	$checkBox2.Size = $System_Drawing_Size
+	$checkBox2.TabIndex = 1
+	$checkBox2.Text = "Email Address"
+	$System_Drawing_Point = New-Object System.Drawing.Point
+	$System_Drawing_Point.X = 27
+	$System_Drawing_Point.Y = 44
+	$checkBox2.Location = $System_Drawing_Point
+	$checkBox2.DataBindings.DefaultDataSourceUpdateMode = 0
+	$checkBox2.Name = "checkBox2"
 
 $form1.Controls.Add($checkBox2)
 
@@ -200,13 +217,15 @@ $box2 = "mail"
 $box3 = "displayname"
 $box4 = '"title"'
 $box5 = "department"
-$prop = "displayname","samaccountname","mail","title","department"
+$box6 = "passwordlastset"
+$prop = "displayname","samaccountname","mail","title","department","passwordlastset"
 [System.Collections.ArrayList]$props = $prop
 if (!$checkBox1.Checked){$props.Remove($box1)}
 if (!$checkBox2.Checked){$props.Remove($box2)}
 if (!$checkBox3.Checked){$props.Remove($box3)}
 if (!$checkBox4.Checked){$props.Remove($box4)}
 if (!$checkBox5.Checked){$props.Remove($box5)}
+if (!$checkBox6.Checked){$props.Remove($box6)}
 $todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
 $result=@()
 switch ($list){
