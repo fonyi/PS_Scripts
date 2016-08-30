@@ -229,9 +229,9 @@ if (!$checkBox6.Checked){$props.Remove($box6)}
 $todaysdate = get-date -date $(get-date).adddays(+0) -format yyyyMMddhhmm
 $result=@()
 switch ($list){
-1 {Foreach($User in $Users)
+1 {Foreach($Input in $Inputs)
 {
-$result += get-aduser -ldapfilter "(mail=$User)" -Properties (foreach{$props}) | Select-Object -Property (foreach{$props})
+$result += get-aduser -ldapfilter "(mail=$Input)" -Properties (foreach{$props}) | Select-Object -Property (foreach{$props})
 }$result|
 Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"}
 
