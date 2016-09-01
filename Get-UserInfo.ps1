@@ -215,7 +215,7 @@ GenerateForm
 $box1 = "samaccountname"
 $box2 = "mail"
 $box3 = "displayname"
-$box4 = '"title"'
+$box4 = "title"
 $box5 = "department"
 $box6 = "passwordlastset"
 $prop = "displayname","samaccountname","mail","title","department","passwordlastset"
