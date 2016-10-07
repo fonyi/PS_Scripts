@@ -5,7 +5,7 @@ $outlook = new-object -comobject outlook.application
 $namespace = $outlook.GetNameSpace("MAPI")
 $namespace.AddStore($FilePath) 
 $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
-$Email=$NameSpace.Folders.Item(11).Folders.Item("Inbox").Folders.Item("RISC").Items
+$Email=$NameSpace.Folders.Item('outlook data file').Folders.Item("Inbox").Folders.Item("RISC").Items
 $Email | foreach {
   "`"$($_.SentOn)`", `"$($_.SenderEmailAddress)`", `"$($_.To)`"" | out-file "$PSScriptRoot\output.txt" -Append
 }
