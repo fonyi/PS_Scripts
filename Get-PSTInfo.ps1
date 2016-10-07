@@ -1,4 +1,4 @@
-#This script takes in a directory where some PSTs live and that can be changed by changing the path for Get-Child Item
+#This script takes in a directory where some PSTs live
 #Then it gets each PST from the directory and then hooks into the MAPI account in Outlook and adds the PST data file
 #It then goes through the PST and pulls some Header info from each message in the folder. 
 #In theory, it should work all the time. 
@@ -29,7 +29,7 @@ ForEach-Object{
 $FilePath = $_.FullName
 #Gives us the File name sans the extenstion 
 $FileName = [io.path]::GetFileNameWithoutExtension($FilePath)
-#starts and outlook session
+#starts an outlook session
 $null = Add-type -assembly Microsoft.Office.Interop.Outlook
 $olFolders = 'Microsoft.Office.Interop.Outlook.olDefaultFolders' -as [type]  
 $outlook = new-object -comobject outlook.application
