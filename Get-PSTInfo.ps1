@@ -5,14 +5,40 @@
 #For some reason this wasn't easy to do
 #Created by Shane Fonyi 10-7-2016
 
-#Function to get the folder path in question
+import-module activedirectory
+#clear all user variables
+$sysvars = get-variable | select -Expand name
 
+  function remove-uservars {
+     get-variable |
+       where {$sysvars -notcontains $_.name} |
+         remove-variable
+    }
+#invoke function
+. remove-uservars
+#create AD drive for non-domain joined comp queries
+write-host "Please enter domain credentials home\username" 
+if (-not(Get-PSDrive AD)) {
+$creds = Get-Credential
+ New-PSDrive `
+    –Name AD `
+    –PSProvider ActiveDirectory `
+    –Server "adhome-lawc-05.home.ku.edu" `
+    -Credential $creds `
+    –Root "//RootDSE/" `
+    -Scope Global
+}
+else{
+ "Drive already exists"
+ }
+
+#Function to get the folder path in question
 Function Get-Folder($initialDirectory)
 {
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | out-null
 
     $foldername = New-Object System.Windows.Forms.FolderBrowserDialog
-    $foldername.rootfolder = "Documents"
+    $foldername.rootfolder = "MyComputer"
 
     if($foldername.ShowDialog() -eq "OK")
     {
@@ -25,10 +51,12 @@ $directory=Get-Folder
 Get-ChildItem $directory -Filter *.pst |
 #Runs through this loop for each PST
 ForEach-Object{
+
 #Grabs the full file path
 $FilePath = $_.FullName
 #Gives us the File name sans the extenstion 
 $FileName = [io.path]::GetFileNameWithoutExtension($FilePath)
+write-host "Now starting $filename PST"
 #starts an outlook session
 $null = Add-type -assembly Microsoft.Office.Interop.Outlook
 $olFolders = 'Microsoft.Office.Interop.Outlook.olDefaultFolders' -as [type]  
@@ -41,15 +69,15 @@ $namespace.AddStore($FilePath)
 $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
 #The kicker: Goes into the newly mounted outlook data file into the Inbox and then into the Folder with a name based on the file name
 function Get-MailboxFolder($folder){
-      #Get the items in the folder and select the properties we want then sends the objects 
+      Write-Host "Now in folder"
+      "{0}: {1}" -f $folder.name, $folder.items.count
       $folder.items|Select SentOn,SenderEmailAddress,To,CC,BCC |Foreach-Object{
-      #go into the pipline and send SenderEmailAddress for the current item in the pipe
-        #determine if the address is in X500 format for legacy exchange and query AD for the address
         if ($_.SenderEmailAddress -like "/O=*"){
             [string]$temp=$_.SenderEmailAddress
             $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
             $temp = $temp -replace ‘[{mail=}]’
             $temp = $temp.trimstart("@")
+            write-host $temp
             $_.SenderEmailAddress =$temp
             $_
         }
@@ -63,19 +91,21 @@ function Get-MailboxFolder($folder){
         } 
       
       }|Export-Csv -NoTypeInformation "$PSScriptRoot\$FileName.csv"
-#recurse into folders      
+      
 foreach ($f in $folder.folders) {
 Get-MailboxFolder $f
 }
 }
-#assumes your version of outlook names inmported PSTs as 'outlook data file' otherwise change it to $filename
+
 foreach ($folder in $NameSpace.Folders.Item('outlook data file')) {
 Get-MailboxFolder $folder
 }
 #Then we rip out the pst for the next one
 $PSTRoot = $PST.GetRootFolder()
 $PSTFolder = $namespace.Folders.Item($PSTRoot.Name)
+write-host "Removing PST $filename"
 $namespace.GetType().InvokeMember('RemoveStore',[System.Reflection.BindingFlags]::InvokeMethod,$null,$namespace,($PSTFolder))
 }
 #finally we exit because we don't like windows open all the time
+write-host "Done"
 exit
