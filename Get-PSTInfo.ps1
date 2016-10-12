@@ -6,13 +6,13 @@
 #Created by Shane Fonyi 10-7-2016
 
 #Function to get the folder path in question
-Function Get-Folder($initialDirectory)
 
+Function Get-Folder($initialDirectory)
 {
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | out-null
 
     $foldername = New-Object System.Windows.Forms.FolderBrowserDialog
-    $foldername.rootfolder = "MyComputer"
+    $foldername.rootfolder = "Documents"
 
     if($foldername.ShowDialog() -eq "OK")
     {
@@ -40,10 +40,37 @@ $namespace.AddStore($FilePath)
 #Adds the PST namespace to a variable needed later
 $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
 #The kicker: Goes into the newly mounted outlook data file into the Inbox and then into the Folder with a name based on the file name
-$Email=$NameSpace.Folders.Item('outlook data file').Folders.Item("Inbox").Folders.Item($FileName).Items
-#Gets us the Sent On date and time, the Sender email address and the To of each email in that folder
-$Email | foreach {
-  "`"$($_.SentOn)`", `"$($_.SenderEmailAddress)`", `"$($_.To)`"" | out-file "$PSScriptRoot\$FileName.csv" -Append
+function Get-MailboxFolder($folder){
+      #Get the items in the folder and select the properties we want then sends the objects 
+      $folder.items|Select SentOn,SenderEmailAddress,To,CC,BCC |Foreach-Object{
+      #go into the pipline and send SenderEmailAddress for the current item in the pipe
+        #determine if the address is in X500 format for legacy exchange and query AD for the address
+        if ($_.SenderEmailAddress -like "/O=*"){
+            [string]$temp=$_.SenderEmailAddress
+            $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
+            $temp = $temp -replace ‘[{mail=}]’
+            $temp = $temp.trimstart("@")
+            $_.SenderEmailAddress =$temp
+            $_
+        }
+        elseif ($_.SenderEmailAddress -eq $null){
+            $_.SenderEmailAddress="No Information"
+            $_
+        }
+        else{
+            $_.SenderEmailAddress=$_.SenderEmailAddress
+            $_        
+        } 
+      
+      }|Export-Csv -NoTypeInformation "$PSScriptRoot\$FileName.csv"
+#recurse into folders      
+foreach ($f in $folder.folders) {
+Get-MailboxFolder $f
+}
+}
+#assumes your version of outlook names inmported PSTs as 'outlook data file' otherwise change it to $filename
+foreach ($folder in $NameSpace.Folders.Item('outlook data file')) {
+Get-MailboxFolder $folder
 }
 #Then we rip out the pst for the next one
 $PSTRoot = $PST.GetRootFolder()
