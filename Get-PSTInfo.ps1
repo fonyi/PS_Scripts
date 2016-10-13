@@ -17,10 +17,11 @@ $sysvars = get-variable | select -Expand name
 #create AD drive for non-domain joined comp queries 
 if (-not(Get-PSDrive AD)) {
 $creds = Get-Credential
+$adserv = Read-Host "Please enter FQDN for domain controller"
  New-PSDrive `
     -Name AD `
     -PSProvider ActiveDirectory `
-    -Server "adserver.domain.com" `
+    -Server $adserv `
     -Credential $creds `
     -Root "//RootDSE/" `
     -Scope Global
