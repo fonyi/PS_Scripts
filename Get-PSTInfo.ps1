@@ -10,22 +10,19 @@ import-module activedirectory
 $sysvars = get-variable | select -Expand name
 
   function remove-uservars {
-     get-variable |
-       where {$sysvars -notcontains $_.name} |
-         remove-variable
+     Get-Variable -Exclude PWD,*Preference | Remove-Variable -EA 0
     }
 #invoke function
 . remove-uservars
-#create AD drive for non-domain joined comp queries
-write-host "Please enter domain credentials home\username" 
+#create AD drive for non-domain joined comp queries 
 if (-not(Get-PSDrive AD)) {
 $creds = Get-Credential
  New-PSDrive `
-    –Name AD `
-    –PSProvider ActiveDirectory `
-    –Server "adhome-lawc-05.home.ku.edu" `
+    -Name AD `
+    -PSProvider ActiveDirectory `
+    -Server "adserver.domain.com" `
     -Credential $creds `
-    –Root "//RootDSE/" `
+    -Root "//RootDSE/" `
     -Scope Global
 }
 else{
@@ -47,6 +44,9 @@ Function Get-Folder($initialDirectory)
     return $folder
 }
 $directory=Get-Folder
+#if outlook is not running, launch a hidden instance.
+$oProc = ( Get-Process | where { $_.Name -eq "OUTLOOK" } )
+if ( $oProc -eq $null ) { Start-Process outlook -WindowStyle Hidden; Start-Sleep -Seconds 5 }
 #goes through each file in our directory and pulls out the PSTs
 Get-ChildItem $directory -Filter *.pst |
 #Runs through this loop for each PST
@@ -71,14 +71,18 @@ $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
 function Get-MailboxFolder($folder){
       Write-Host "Now in folder"
       "{0}: {1}" -f $folder.name, $folder.items.count
-      $folder.items|Select SentOn,SenderEmailAddress,To,CC,BCC |Foreach-Object{
-        if ($_.SenderEmailAddress -like "/O=*"){
+      $folder.items|Select SentOn,SenderName,SenderEmailAddress,To,CC,BCC |Foreach-Object{
+        if ($_.SenderEmailAddress -like "/*"){
             [string]$temp=$_.SenderEmailAddress
             $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
-            $temp = $temp -replace ‘[{mail=}]’
-            $temp = $temp.trimstart("@")
-            write-host $temp
-            $_.SenderEmailAddress =$temp
+            $temp = $temp -replace '^(@{mail=)'
+            $temp = $temp.trim("}")
+            if ($temp -ne '*'){
+            $_.SenderEmailAddress =$_.SenderEmailAddress
+            }
+            else{
+            $_.SenderEmailAddress = $temp
+            }
             $_
         }
         elseif ($_.SenderEmailAddress -eq $null){
@@ -90,7 +94,7 @@ function Get-MailboxFolder($folder){
             $_        
         } 
       
-      }|Export-Csv -NoTypeInformation "$PSScriptRoot\$FileName.csv"
+      }|Export-Csv -NoTypeInformation "$PSScriptRoot\$FileName.csv" -Append
       
 foreach ($f in $folder.folders) {
 Get-MailboxFolder $f
