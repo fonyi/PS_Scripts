@@ -78,15 +78,17 @@ function Get-MailboxFolder($folder){
             $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
             $temp = $temp -replace '^(@{mail=)'
             $temp = $temp.trim("}")
-            if ($temp -ne '*'){
+            if ([string]::IsNullOrEmpty($temp)){
             $_.SenderEmailAddress =$_.SenderEmailAddress
+            $_
             }
             else{
             $_.SenderEmailAddress = $temp
-            }
             $_
+            }
+            
         }
-        elseif ($_.SenderEmailAddress -eq $null){
+        elseif ([string]::IsNullOrEmpty($_.SenderEmailAddress)){
             $_.SenderEmailAddress="No Information"
             $_
         }
@@ -102,7 +104,7 @@ Get-MailboxFolder $f
 }
 }
 
-foreach ($folder in $NameSpace.Folders.Item('outlook data file')) {
+foreach ($folder in $NameSpace.Folders.Item($filename)) {
 Get-MailboxFolder $folder
 }
 #Then we rip out the pst for the next one
