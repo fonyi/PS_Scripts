@@ -75,14 +75,18 @@ function Get-MailboxFolder($folder){
       $folder.items|Select SentOn,SenderName,SenderEmailAddress,To,CC,BCC |Foreach-Object{
         if ($_.SenderEmailAddress -like "/*"){
             [string]$temp=$_.SenderEmailAddress
+            #write-host "not trimmed: $temp"
             $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
-            $temp = $temp -replace '^(@{mail=)'
-            $temp = $temp.trim("}")
+            #$temp = $temp -replace '^(@{mail=)'
+            $temp = $temp.trim("@{mail=}")
+            #write-host "trimed: $temp"
             if ([string]::IsNullOrEmpty($temp)){
+            #write-host "no data: $temp"
             $_.SenderEmailAddress =$_.SenderEmailAddress
             $_
             }
             else{
+            #write-host "data: $temp"
             $_.SenderEmailAddress = $temp
             $_
             }
