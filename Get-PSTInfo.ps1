@@ -78,7 +78,7 @@ function Get-MailboxFolder($folder){
             #write-host "not trimmed: $temp"
             $temp = get-aduser -ldapfilter "(legacyExchangeDN=$temp)" -Properties mail | select-object -Property mail
             #$temp = $temp -replace '^(@{mail=)'
-            $temp = $temp.trim("@{mail=}")
+            $temp =[regex]::Match($temp,'=(.*?)}').captures.groups[1].value
             #write-host "trimed: $temp"
             if ([string]::IsNullOrEmpty($temp)){
             #write-host "no data: $temp"
