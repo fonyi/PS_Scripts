@@ -1,10 +1,38 @@
 #This script takes in a directory where some PSTs live
 #Then it gets each PST from the directory and then hooks into the MAPI account in Outlook and adds the PST data file
-#It then goes through the PST and pulls some Header info from each message in the folder. 
-#In theory, it should work all the time. 
+#It then goes through the PST and pulls some Header info from each message in the folder.
+#In theory, it should work all the time.
 #For some reason this wasn't easy to do
 #Created by Shane Fonyi 10-7-2016
 
+# CSharp code that is used to look in the Recipient object in an Outlook message
+$sourceCode = @'
+public class Recipient{
+public string smtpRecip(Outlook.MailItem mail)
+{
+    const string PR_SMTP_ADDRESS =
+        "http://schemas.microsoft.com/mapi/proptag/0x39FE001E";
+    Outlook.Recipients recips = mail.Recipients;
+    foreach (Outlook.Recipient recip in recips)
+    {
+        Outlook.PropertyAccessor pa = recip.PropertyAccessor;
+        string smtpAddress =
+            pa.GetProperty(PR_SMTP_ADDRESS).ToString();
+        Debug.WriteLine(recip.Name + " SMTP=" + smtpAddress);
+        return smtpAddress
+    }
+}
+}
+'@
+try{
+  Add-type -TypeDefinition $sourceCode
+  $recip=New-Object -TypeName Recipient
+}
+catch
+{
+  Write-Warning "An error occurred attempting to add the .NET Framework class to the PowerShell session."
+  Write-Warning "The error was: $($Error[0].Exception.Message)"
+}
 import-module activedirectory
 #clear all user variables
 $sysvars = get-variable | select -Expand name
@@ -14,7 +42,7 @@ $sysvars = get-variable | select -Expand name
     }
 #invoke function
 . remove-uservars
-#create AD drive for non-domain joined comp queries 
+#create AD drive for non-domain joined comp queries
 if (-not(Get-PSDrive AD)) {
 $creds = Get-Credential
 $adserv = Read-Host "Please enter FQDN for domain controller"
@@ -44,6 +72,7 @@ Function Get-Folder($initialDirectory)
     }
     return $folder
 }
+
 $directory=Get-Folder
 #if outlook is not running, launch a hidden instance.
 $oProc = ( Get-Process | where { $_.Name -eq "OUTLOOK" } )
@@ -55,24 +84,30 @@ ForEach-Object{
 
 #Grabs the full file path
 $FilePath = $_.FullName
-#Gives us the File name sans the extenstion 
+#Gives us the File name sans the extenstion
 $FileName = [io.path]::GetFileNameWithoutExtension($FilePath)
 write-host "Now starting $filename PST"
 #starts an outlook session
 $null = Add-type -assembly Microsoft.Office.Interop.Outlook
-$olFolders = 'Microsoft.Office.Interop.Outlook.olDefaultFolders' -as [type]  
+$olFolders = 'Microsoft.Office.Interop.Outlook.olDefaultFolders' -as [type]
 $outlook = new-object -comobject outlook.application
 #hooks into MAPI profile in Outlook
 $namespace = $outlook.GetNameSpace("MAPI")
 #Adds our PST to the MAPI profile
-$namespace.AddStore($FilePath) 
+$namespace.AddStore($FilePath)
 #Adds the PST namespace to a variable needed later
 $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
 #The kicker: Goes into the newly mounted outlook data file into the Inbox and then into the Folder with a name based on the file name
 function Get-MailboxFolder($folder){
       Write-Host "Now in folder"
       "{0}: {1}" -f $folder.name, $folder.items.count
-      $folder.items|Select SentOn,SenderName,SenderEmailAddress,To,CC,BCC |Foreach-Object{
+      #this loop sends the MailItem to the Csharp code above to yank out SMTP addresses and placed them back in the object
+      $folder.items | Foreach-Object{
+        $recipients=$recip.smtpRecip($_)
+        $_.Recipients = $recipients
+        $_
+      }
+      $folder.items|Select SentOn,SenderName,SenderEmailAddress,To,CC,BCC,Recipients |Foreach-Object{
         if ($_.SenderEmailAddress -like "/*"){
             [string]$temp=$_.SenderEmailAddress
             #write-host "not trimmed: $temp"
@@ -90,7 +125,7 @@ function Get-MailboxFolder($folder){
             $_.SenderEmailAddress = $temp
             $_
             }
-            
+
         }
         elseif ([string]::IsNullOrEmpty($_.SenderEmailAddress)){
             $_.SenderEmailAddress="No Information"
@@ -98,11 +133,10 @@ function Get-MailboxFolder($folder){
         }
         else{
             $_.SenderEmailAddress=$_.SenderEmailAddress
-            $_        
-        } 
-      
+            $_
+        }
       }|Export-Csv -NoTypeInformation "$PSScriptRoot\$FileName.csv" -Append
-      
+#recursion recursion recursion
 foreach ($f in $folder.folders) {
 Get-MailboxFolder $f
 }
@@ -111,6 +145,7 @@ Get-MailboxFolder $f
 foreach ($folder in $NameSpace.Folders.Item($filename)) {
 Get-MailboxFolder $folder
 }
+
 #Then we rip out the pst for the next one
 $PSTRoot = $PST.GetRootFolder()
 $PSTFolder = $namespace.Folders.Item($PSTRoot.Name)
