@@ -5,34 +5,6 @@
 #For some reason this wasn't easy to do
 #Created by Shane Fonyi 10-7-2016
 
-# CSharp code that is used to look in the Recipient object in an Outlook message
-$sourceCode = @'
-public class Recipient{
-public string smtpRecip(Outlook.MailItem mail)
-{
-    const string PR_SMTP_ADDRESS =
-        "http://schemas.microsoft.com/mapi/proptag/0x39FE001E";
-    Outlook.Recipients recips = mail.Recipients;
-    foreach (Outlook.Recipient recip in recips)
-    {
-        Outlook.PropertyAccessor pa = recip.PropertyAccessor;
-        string smtpAddress =
-            pa.GetProperty(PR_SMTP_ADDRESS).ToString();
-        Debug.WriteLine(recip.Name + " SMTP=" + smtpAddress);
-        return smtpAddress
-    }
-}
-}
-'@
-try{
-  Add-type -TypeDefinition $sourceCode
-  $recip=New-Object -TypeName Recipient
-}
-catch
-{
-  Write-Warning "An error occurred attempting to add the .NET Framework class to the PowerShell session."
-  Write-Warning "The error was: $($Error[0].Exception.Message)"
-}
 import-module activedirectory
 #clear all user variables
 $sysvars = get-variable | select -Expand name
@@ -101,12 +73,6 @@ $PST = $namespace.Stores | ? {$_.FilePath -eq $FilePath}
 function Get-MailboxFolder($folder){
       Write-Host "Now in folder"
       "{0}: {1}" -f $folder.name, $folder.items.count
-      #this loop sends the MailItem to the Csharp code above to yank out SMTP addresses and placed them back in the object
-      $folder.items | Foreach-Object{
-        $recipients=$recip.smtpRecip($_)
-        $_.Recipients = $recipients
-        $_
-      }
       $folder.items|Select SentOn,SenderName,SenderEmailAddress,To,CC,BCC,Recipients |Foreach-Object{
         if ($_.SenderEmailAddress -like "/*"){
             [string]$temp=$_.SenderEmailAddress
