@@ -108,9 +108,10 @@ ForEach-Object{
 		"{0}: {1}" -f $folder.name, $folder.items.count
 		if ($folder.items.count -gt 0)
 		{
-			$folder.items | Select SentOn, SenderName, SenderEmailAddress, Recipients | Foreach-Object{
+			$count = 0
+			$folder.items | Select SentOn, Subject, SenderName, SenderEmailAddress, Recipients | Foreach-Object{
+				$count += 1
 				$recips = $_.Recipients
-				$commaarray = $null
 				$recipsarray = $null
 				#Go through each email and pull the recipeints and add them to an array
 				foreach ($recip in $recips)
@@ -125,28 +126,34 @@ ForEach-Object{
 						#write-host "trimed: $temp0"
 						if ([string]::IsNullOrEmpty($temp0))
 						{
-							write-host "no data: $temp0"
+							#write-host "no data: $temp0"
+							$recipsarray += $recip.Name
+							$recipsarray += " <"
 							$recipsarray += $recip.Address
-							$recipsarray += " "
+							$recipsarray += "> "
 							
 						}
 						else
 						{
 							#write-host "data: $temp0"
+							$recipsarray += $recip.Name
+							$recipsarray += " <"
 							$recipsarray += $temp0
-							$recipsarray += " "
+							$recipsarray += "> "
 						}
 						
 					}
-					elseif ([string]::IsNullOrEmpty($_.SenderEmailAddress))
+					elseif ([string]::IsNullOrEmpty($temp0))
 					{
 						$recipsarray += "No Information"
 						$recipsarray += " "
 					}
 					else
 					{
+						$recipsarray += $recip.Name
+						$recipsarray += " <"
 						$recipsarray += $recip.Address
-						$recipsarray += " "
+						$recipsarray += "> "
 					}
 					
 				}
