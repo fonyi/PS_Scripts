@@ -1,4 +1,4 @@
-
+#Requires –Modules ActiveDirectory
 <#	
 	.NOTES
 	===========================================================================
@@ -22,7 +22,6 @@
 #>
 
 Import-Module ActiveDirectory
-#Requires –Modules ActiveDirectory
 Add-Type -AssemblyName System.Windows.Forms
 Function Get-FileName($initialDirectory)
 {
