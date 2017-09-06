@@ -14,13 +14,20 @@
 		The output will be placed in the current working directory with the name outputyyyyMMDDhhmm.csv
 		The ouput options determine the values pulled from LDAP and added to the CSV for each user 
 	.INPUTS
-		None
+		File path to the text file with the list of users (First Last; Last, First; email addresses; samaccountname)
 	.OUTPUTS
 		CSV with selected information named with the date and placed in the PSScriptRoot
 	.EXAMPLE
 		./Get-UserInfo.ps1
+        ./Get-UserInfo.ps1 -path \path\to\inputfile.txt -output \path\to\outputdirectory\
+        ./Get-UserInfo.ps1 -path \path\to\inputfile.txt
 #>
-
+param(
+    [Parameter(Mandatory=$False,Position=1)]
+    [string]$path,
+    [Parameter(Mandatory=$False)]
+    [string]$output
+)
 Import-Module ActiveDirectory
 Add-Type -AssemblyName System.Windows.Forms
 Function Get-FileName($initialDirectory)
@@ -228,8 +235,15 @@ Function GenerateForm
 
 
 $list = Read-Host -Prompt "`n Enter the number for the list type being uploaded `n (1) list of email addresses `n (2) list of usernames `n (3) list of Lastname, Firstname `n (4) list of Fistname Lastname `n"
-$inputfile = Get-FileName "C:\temp"
-$Inputs = Get-Content $inputfile
+if([string]::IsNullOrEmpty($path))
+{
+    $inputfile = Get-FileName "C:\temp"
+    $Inputs = Get-Content $inputfile
+}
+else
+{
+    $Inputs = Get-Content $path
+}
 #Call the Function
 GenerateForm
 $box1 = "samaccountname"
@@ -247,6 +261,14 @@ if (!$checkBox4.Checked) { $props.Remove($box4) }
 if (!$checkBox5.Checked) { $props.Remove($box5) }
 if (!$checkBox6.Checked) { $props.Remove($box6) }
 $todaysdate = get-date -date $(get-date).adddays(+ 0) -format yyyyMMddhhmm
+if([string]::IsNullOrEmpty($output))
+{
+    $out_file = "$PSScriptRoot\output$todaysdate.csv"
+}
+else
+{
+    $out_file = "$output\output$todaysdate.csv"
+}
 $result = @()
 switch ($list)
 {
@@ -255,7 +277,7 @@ switch ($list)
 		{
 			$result += get-aduser -ldapfilter "(mail=$Input)" -Properties (foreach { $props }) | Select-Object -Property (foreach { $props })
 		}$result |
-		Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
+		Export-Csv -NoTypeInformation $out_file
 	}
 	
 	2 {
@@ -263,7 +285,7 @@ switch ($list)
 		{
 			$result += get-aduser -ldapfilter "(samaccountname=$Input)" -Properties (foreach { $props }) | Select-Object -Property (foreach { $props })
 		}$result |
-		Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
+		Export-Csv -NoTypeInformation $out_file
 	}
 	
 	3 {
@@ -272,7 +294,7 @@ switch ($list)
 			$Lastname, $Firstname = $Input.split(', ', 2)
 			$result += get-aduser -filter { sn -like $Lastname -and givenName -like $Firstname } -Properties (foreach { $props }) | Select-Object -Property (foreach { $props })
 		}$result |
-		Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
+		Export-Csv -NoTypeInformation $out_file
 	}
 	
 	4 {
@@ -281,7 +303,7 @@ switch ($list)
 			$Firstname, $Lastname = $Input.split(' ', 2)
 			$result += get-aduser -filter { sn -like $Lastname -and givenName -like $Firstname } -Properties (foreach { $props }) | Select-Object -Property (foreach { $props })
 		}$result |
-		Export-Csv -NoTypeInformation "$PSScriptRoot\output$todaysdate.csv"
+		Export-Csv -NoTypeInformation $out_file
 	}
 	
 	default { write-host "No valid option selected" }
