@@ -19,8 +19,8 @@
 		CSV with selected information named with the date and placed in the PSScriptRoot
 	.EXAMPLE
 		./Get-UserInfo.ps1
-        ./Get-UserInfo.ps1 -path \path\to\inputfile.txt -output \path\to\outputdirectory\
-        ./Get-UserInfo.ps1 -path \path\to\inputfile.txt
+        	./Get-UserInfo.ps1 -path \path\to\inputfile.txt -output \path\to\outputdirectory\
+        	./Get-UserInfo.ps1 -path \path\to\inputfile.txt
 #>
 param(
     [Parameter(Mandatory=$False,Position=1)]
