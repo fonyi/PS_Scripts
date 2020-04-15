@@ -11,8 +11,7 @@
   vulnerable software then outputs in a CSV format for ingestion into AzureAD group
 	creation.
 
-	.PARAMETER
-	path
+	.PARAMETER path
 	(Optional) Path to CSV exported from ATP
 	.OUTPUTS
 	CSV File in the current PowerShell working directory
