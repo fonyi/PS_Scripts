@@ -1,7 +1,6 @@
 <#	
 	.NOTES
 	===========================================================================
-	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2017 v5.4.136
 	 Created on:    10-7-2016 2:57 PM
 	 Updated on:	08-5-2017 3:00 PM
 	 Created by:   	Shane Fonyi
