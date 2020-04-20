@@ -63,7 +63,7 @@ ForEach-Object{
 	write-host "Creating folder for attachments"
 	New-Item $PSScriptRoot\$FileName -ItemType Directory
 	#starts an outlook session
-	$null = Add-type -assembly Microsoft.Office.Interop.Outlook
+	#$null = Add-type -assembly Microsoft.Office.Interop.Outlook
 	$olFolders = 'Microsoft.Office.Interop.Outlook.olDefaultFolders' -as [type]
 	$outlook = new-object -comobject outlook.application
 	#hooks into MAPI profile in Outlook
@@ -92,14 +92,17 @@ ForEach-Object{
 		if ($folder.items.count -gt 0)
 		{
 			$count = 0
+			$total = $folder.items.count
 			$folder.items | Select-Object SentOn, Subject, SenderName, SenderEmailAddress, Recipients, Attachments | Foreach-Object{
 				$count += 1
-                Write-Progress -Activity "Evaluating Items in folder $($folder.name)" -PercentComplete $count/($folder.items.count)*100
-				$attachmentfolder = $_.SentOn + "-" + $_.Subject
-				New-Item "$PSScriptRoot\$FileName\$attachmentfolder" -ItemType Directory
-				$targetdir = "$PSScriptRoot\$FileName\$attachmentfolder"
+                Write-Progress -Activity "Evaluating Items in folder $($folder.name)" -PercentComplete ($count/$total*100)
+				#$attachmentfolder = "$_.SentOn" + "-" + "$_.Subject"
+				#New-Item "$PSScriptRoot\$FileName\$attachmentfolder" -ItemType Directory
+				#$targetdir = "$PSScriptRoot\$FileName\$attachmentfolder"
+				$targetdir = "$PSScriptRoot\$FileName"
 				Foreach($attachment in $_.Attachments){
-					$attachment.saveasfile("$targetdir\$attachment.FileName")
+					$fn = $attachment | Select-Object -ExpandProperty FileName
+					$attachment.saveasfile("$targetdir\$fn")
 				}
 			
 			}
