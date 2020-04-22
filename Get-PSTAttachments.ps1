@@ -7,13 +7,12 @@
 	 Filename: Get-PSTAttachments.ps1    	
 	===========================================================================
 	 .SYNOPSIS  
-     Exports information from emails in PSTs to a CSV for processing/analysis
+     Exports attachments from emails in PSTs to a single directory in the PS script root directory.
 	.DESCRIPTION
 	 This script takes in a directory where some PSTs live.
-	 Then it gets each PST from the directory and then hooks into the MAPI account in Outlook and adds the PST data file. 
-	 It then goes through the PST and pulls attachments from each message in the folder. If the PST is from an exchange
-	 mailbox then the script will look up the ExchangeDN in AD and pull the address of the user for both sender and recipient.
-	 The data from emails in the PST is exported to a CSV with common needed fields for each PST
+	 Then it gets each PST from the directory and then hooks into the MAPI for Outlook and adds the PST data file. 
+	 It then goes through the PST and pulls attachments from each message in the folder and saves it by file name
+	 to a directory named the same as the PST which is created in the root of the PS script directory.
 	.INPUTS
 	None
 	.OUTPUTS
