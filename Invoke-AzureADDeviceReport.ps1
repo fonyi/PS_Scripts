@@ -36,8 +36,8 @@ catch{
 <#
 ###This function creates the custom PSObject that will hold the computer information in a digestable format.
 #>
-Function Add-DeviceItem ($User='Empty',$LastLogin='Empty',$Name='Empty',$OS='Empty',$OSVer='Empty',$Managed='Empty',$Compliant='Empty',$ID='Empty') {
-    New-Object -TypeName psObject -Property @{User=$user;LastLogin=$LastLogin;Name=$Name;OS=$OS;OSVer=$OSVer;Managed=$Managed;Compliant=$Compliant;ID=$ID}
+Function Add-DeviceItem ($User='Empty',$LastLogin='Empty',$Name='Empty',$OS='Empty',$OSVer='Empty',$Managed='Empty',$Compliant='Empty',$ID='Empty',$ObjectID='Empty') {
+    New-Object -TypeName psObject -Property @{User=$user;LastLogin=$LastLogin;Name=$Name;OS=$OS;OSVer=$OSVer;Managed=$Managed;Compliant=$Compliant;ID=$ID;ObjectID=$ObjectID}
 }
 
 while($true){
@@ -77,7 +77,7 @@ else{
     $Devices = Get-AzureADUserRegisteredDevice -ObjectId $user.UserPrincipalName | Get-AzureADDevice | Select * 
         Foreach ($device in $devices){
 
-            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId
+            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId -ObjectID $device.ObjectId
       
         }
     }
