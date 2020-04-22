@@ -109,6 +109,13 @@ else{
     $filename = "AzureDeviceReport-$selectedgrp-$timestamp"
  }
 }
+If($selectedgrp.Contains('\')){
+    $selectedgrp = $selectedgrp.Replace('\','-')
+}
+If($selectedgrp.Contains('/')){
+    $selectedgrp = $selectedgrp.Replace('/','-')
+}
+$filename = "AzureDeviceReport-$selectedgrp-$timestamp"
 $MachineInfo | Export-Csv -Path "$PSScriptroot\$filename.csv" -NoTypeInformation
 }
 
