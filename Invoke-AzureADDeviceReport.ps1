@@ -36,8 +36,8 @@ catch{
 <#
 ###This function creates the custom PSObject that will hold the computer information in a digestable format.
 #>
-Function Add-DeviceItem ($User='Empty',$LastLogin='Empty',$Name='Empty',$OS='Empty',$OSVer='Empty',$Managed='Empty',$Compliant='Empty',$ID='Empty',$ObjectID='Empty') {
-    New-Object -TypeName psObject -Property @{User=$user;LastLogin=$LastLogin;Name=$Name;OS=$OS;OSVer=$OSVer;Managed=$Managed;Compliant=$Compliant;ID=$ID;ObjectID=$ObjectID}
+Function Add-DeviceItem ($User='Empty',$LastLogin='Empty',$Name='Empty',$OS='Empty',$OSVer='Empty',$Managed='Empty',$Compliant='Empty',$TrustType='Empty',$ID='Empty',$ObjectID='Empty') {
+    New-Object -TypeName psObject -Property @{User=$user;LastLogin=$LastLogin;Name=$Name;OS=$OS;OSVer=$OSVer;Managed=$Managed;Compliant=$Compliant;TrustType=$TrustType;ID=$ID;ObjectID=$ObjectID}
 }
 
 while($true){
@@ -73,11 +73,16 @@ else{
     $selectedgrp  = $azuregrps[$ans-1].DisplayName
     Write-Host $azuregrps[$ans-1].DisplayName
     $Users = Get-AzureADGroupMember -ObjectId $selection
+    $ucount=0
     Foreach ($user in $Users){
-    $Devices = Get-AzureADUserRegisteredDevice -ObjectId $user.UserPrincipalName | Get-AzureADDevice | Select * 
+        $ucount++
+        Write-Progress -Activity "Getting User Information" -CurrentOperation $user.UserPrincipalName -PercentComplete ($ucount/$Users.count*100)
+        $dcount = 0
+        $Devices = Get-AzureADUserRegisteredDevice -ObjectId $user.UserPrincipalName | Get-AzureADDevice | Select-Object * 
         Foreach ($device in $devices){
-
-            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId -ObjectID $device.ObjectId
+            $dcount ++
+            Write-Progress -Activity "Getting Device Information" -CurrentOperation $device.DisplayName -PercentComplete ($dcount/$devices.count*100)
+            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId -ObjectID $device.ObjectId -TrustType $device.TrustType
       
         }
     }
@@ -88,11 +93,16 @@ else{
     $selectedgrp = $azuregrps.DisplayName
     Write-Host $selection
     $Users = Get-AzureADGroupMember -ObjectId $selection
+    $ucount = 0
     Foreach ($user in $Users){
-    $Devices = Get-AzureADUserRegisteredDevice -ObjectId $user.UserPrincipalName | Get-AzureADDevice | Select * | where {$_.IsManaged -eq $true}
+        $ucount++
+        Write-Progress -Activity "Getting User Information" -CurrentOperation $user.UserPrincipalName -PercentComplete ($ucount/$Users.count*100)
+        $dcount = 0
+        $Devices = Get-AzureADUserRegisteredDevice -ObjectId $user.UserPrincipalName | Get-AzureADDevice | Select-Object * | Where-Object {$_.IsManaged -eq $true}
         Foreach ($device in $devices){
-
-            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId
+            $dcount++
+            Write-Progress -Activity "Getting Device Information" -CurrentOperation $device.DisplayName -PercentComplete ($dcount/$devices.count*100)
+            $MachineInfo += Add-DeviceItem -User $user.UserPrincipalName -LastLogin $device.ApproximateLastLogonTimeStamp -Name $device.DisplayName -OS $device.DeviceOSType -OSVer $device.DeviceOSVersion -Managed $device.IsManaged -Compliant $device.IsCompliant -ID $device.DeviceId -ObjectID $device.ObjectId -TrustType $device.TrustType
       
         }
     }
