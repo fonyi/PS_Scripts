@@ -1,4 +1,4 @@
-﻿$BLVol=BitLockerVolume -MountPoint $env:SystemDrive | Select *
+﻿$BLVol = Get-BitLockerVolume -MountPoint $env:SystemDrive | Select *
 if($BLVol.VolumeStatus -eq "FullyEncrypted"){
     if([string]::IsNullOrEmpty($BLVol.KeyProtector -match 'RecoveryPassword')){
         Add-BitLockerKeyProtector -MountPoint $env:SystemDrive -RecoveryPasswordProtector
