@@ -8,10 +8,15 @@
 	===========================================================================
 	.DESCRIPTION
 		This script is used to search in Microsoft Graph for
-        all InTune MDM devices and their OS edition. The
-        information returns the UPN of the device owner. The 
-        UPN is queried to get the department of the owner and
-        the output is a CSV. Takes about 15-20 minutes to run.
+        all InTune MDM Windows devices and their Encryption status. The
+        information returns TRUE/FALSE and the AzureAD Object ID. AzureAD is
+	queried for recovery key information. The recovery key is not exposed
+	by default. The data is then combined to show which devices are encrypted
+	but not escrowing a key. The Excel sheet can be filtered by column R for
+	TRUE and then column C for FALSE to get the list of items that are encrypted
+	and not escrowed. The remediation script Create-BitLockerRecoveryPassword.ps1
+	can be pushed in InTune to create and/or send the recovery password to AzureAD.
+	Takes about 15-20 minutes to run.
 
 	.INPUTS
 		NONE
