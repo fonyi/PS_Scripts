@@ -3,8 +3,8 @@
 	.NOTES
 	===========================================================================
 	 Created by:   	Shane Fonyi (shane.fonyi@westpoint.edu)
-	 Organization: 	Army Cyber Institute
-	 Filename:     	Run-AzureADDeviceReport.ps1
+	 Organization: 	United States Military Academy
+	 Filename:     	Invoke-AzureADIntuneBitLockerEscrowCheck.ps1
 	===========================================================================
 	.DESCRIPTION
 		This script is used to search in Microsoft Graph for
@@ -21,9 +21,9 @@
 	.INPUTS
 		NONE
 	.OUTPUTS
-		CSV File in the current PowerShell working directory
+		XLSX File in the current PowerShell working directory
 	.EXAMPLE
-		./Invoke-AzureADDeviceReport.ps1
+		./Invoke-AzureADIntuneBitLockerEscrowCheck.ps1
 #>
 
 ####################################################
